@@ -138,12 +138,12 @@ def getStatus():
 #     json_response = response.json()
 #     print(json_response['result']['stats'])
 
-def sendMail():
+def sendMail(b):
     sg = sendgrid.SendGridAPIClient(apikey=os.environ.get('SENDGRID_API_KEY'))
     from_email = Email("rshang@gmail.com")
     to_email = Email("rshang@gmail.com")
-    subject = "NiceHash"
-    content = Content("text/plain", "you need to pay attention to your NiceHash account.")
+    subject = "NiceHash update"
+    content = Content("text/plain", "You need to pay attention to your NiceHash account.  You now have {:9.8f}BTC.".format(b))
     mail = Mail(from_email, subject, to_email, content)
     response = sg.client.mail.send.post(request_body=mail.get())
     print(response.status_code)
@@ -157,12 +157,12 @@ def job():
 
     if b> 0.001:
         print("great")
-        sendMail()
+        sendMail(b)
 
 
 if __name__ == '__main__':
 
-    schedule.every().day.at("07:30").do(job)
+    schedule.every().day.at("14:30").do(job)
 
     while 1:
         schedule.run_pending()
