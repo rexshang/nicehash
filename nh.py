@@ -1,6 +1,12 @@
 import requests
 from http import HTTPStatus
 from enum import Enum
+import sendgrid
+import os
+from sendgrid.helpers.mail import *
+import schedule
+import time
+
 
 url = 'https://api.nicehash.com/api?'
 params = {'key': '98cbf48d-513b-c9c6-1d6f-9aeb3d95afda', 'id': '1343547'}
@@ -132,13 +138,36 @@ def getStatus():
 #     json_response = response.json()
 #     print(json_response['result']['stats'])
 
-if __name__ == '__main__':
-    
+def sendMail():
+    sg = sendgrid.SendGridAPIClient(apikey=os.environ.get('SENDGRID_API_KEY'))
+    from_email = Email("rshang@gmail.com")
+    to_email = Email("rshang@gmail.com")
+    subject = "NiceHash"
+    content = Content("text/plain", "you need to pay attention to your NiceHash account.")
+    mail = Mail(from_email, subject, to_email, content)
+    response = sg.client.mail.send.post(request_body=mail.get())
+    print(response.status_code)
+    print(response.body)
+    print(response.headers)
+
+
+def job():
     b = getBalance()
     print ("balance {:9.8f} ".format(b))
 
     if b> 0.001:
         print("great")
+        sendMail()
+
+
+if __name__ == '__main__':
+
+    schedule.every().day.at("07:30").do(job)
+
+    while 1:
+        schedule.run_pending()
+        time.sleep(1)
+
     # this test should be only run on updating process
     # parser = argparse.ArgumentParser()
     # parser.add_argument('-d', '--date', action='store', dest='task_date', help='task date, in format of 2017-10-17', default=datetime.datetime.now().strftime("%Y-%m-%d"))
