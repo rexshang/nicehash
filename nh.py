@@ -6,6 +6,7 @@ import os
 from sendgrid.helpers.mail import *
 import schedule
 import time
+import argparse
 
 
 url = 'https://api.nicehash.com/api?'
@@ -88,6 +89,7 @@ class minerStatus:
     Location = 5
     Algo = 6
 
+
 def getBalance():
     params['method'] = 'balance'
 
@@ -104,6 +106,7 @@ def getBalance():
                 return v
     else:
         print(response)
+
 
 def getStatus():
     params['method'] = 'stats.provider.workers'
@@ -153,26 +156,37 @@ def sendMail(b):
 
 def job():
     b = getBalance()
-    print ("balance {:9.8f} ".format(b))
+    print("balance {:9.8f} ".format(b))
 
-    if b> 0.001:
+    if b > 0.001:
         print("great")
         sendMail(b)
 
 
+def main(args):
+    if args.server:
+        schedule.every().day.at("07:30").do(job)
+
+        while 1:
+            schedule.run_pending()
+            time.sleep(1)
+    elif args.balance:
+        getBalance()
+    elif args.miner:
+        getStatus()
+    else:
+        getStatus()
+
+
 if __name__ == '__main__':
 
-    schedule.every().day.at("14:30").do(job)
+    parser = argparse.ArgumentParser()
 
-    while 1:
-        schedule.run_pending()
-        time.sleep(1)
-
-    # this test should be only run on updating process
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument('-d', '--date', action='store', dest='task_date', help='task date, in format of 2017-10-17', default=datetime.datetime.now().strftime("%Y-%m-%d"))
-    # parser.add_argument('-t', '--type', action='store', dest='task_type', help='type of task, either training or updating', required=True)
-    # parser.add_argument('-c', '--conf', action='store', dest='task_conf', help='config file path', default='pe_1024.yml')
-    # parser.add_argument('-m', '--model', action='store', dest='task_model', help='model type', default='pe_1024')
-    # args = parser.parse_args()
-    # main(args)
+    parser.add_argument('-m', '--miner', action='store_true',
+                        help='get miner info')
+    parser.add_argument('-b', '--balance', action='store_true',
+                        help='get balance info')
+    parser.add_argument(
+        '-s', '--server', action='store_true', help='server mode')
+    args = parser.parse_args()
+    main(args)
