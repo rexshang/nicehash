@@ -82,44 +82,48 @@ class minerStatus:
     Location = 5
     Algo = 6
 
+def getBalance():
+    params['method'] = 'balance'
 
-params['method'] = 'balance'
+    response = requests.get(url, params=params, headers=headers)
+    if response.status_code == HTTPStatus.OK:
+        json_response = response.json()
 
-response = requests.get(url, params=params, headers=headers)
-if response.status_code == HTTPStatus.OK:
-    json_response = response.json()
+        balances = json_response['result']
+        for k, v in balances.items():
+            v = float(v)
+            print("{:20s} {:20.8f} BTC".format(k, v))
 
-    balances = json_response['result']
-    for k, v in balances.items():
-        v = float(v)
-        print("{:20s} {:20.8f} BTC".format(k, v))
-else:
-    print(response)
+            if k == "balance_confirmed":
+                return v
+    else:
+        print(response)
 
-params['method'] = 'stats.provider.workers'
+def getStatus():
+    params['method'] = 'stats.provider.workers'
 
-response = requests.get(url, params=params, headers=headers)
-if response.status_code == HTTPStatus.OK:
-    json_response = response.json()
+    response = requests.get(url, params=params, headers=headers)
+    if response.status_code == HTTPStatus.OK:
+        json_response = response.json()
 
-    miners = json_response['result']['workers']
+        miners = json_response['result']['workers']
 
-    for miner in sorted(miners, key=lambda k: k[0], reverse=False):
-        if miner[minerStatus.Algo] in algo:
-            algorithm = algo[miner[minerStatus.Algo]]
-        else:
-            algorithm = ""
+        for miner in sorted(miners, key=lambda k: k[0], reverse=False):
+            if miner[minerStatus.Algo] in algo:
+                algorithm = algo[miner[minerStatus.Algo]]
+            else:
+                algorithm = ""
 
-        if miner[minerStatus.Location] in loc:
-            location = loc[miner[minerStatus.Location]]
-        else:
-            location = ""
+            if miner[minerStatus.Location] in loc:
+                location = loc[miner[minerStatus.Location]]
+            else:
+                location = ""
 
-        print("{:20s} algo: {:15s} {:10d} min, {:2s}".format(
-            miner[minerStatus.Name], algorithm, miner[minerStatus.Time], location))
-    # print(json_response['result'])
-else:
-    print(response)
+            print("{:20s} algo: {:15s} {:10d} min, {:2s}".format(
+                miner[minerStatus.Name], algorithm, miner[minerStatus.Time], location))
+        # print(json_response['result'])
+    else:
+        print(response)
 
 # params['method'] = 'stats.provider'
 
@@ -127,3 +131,19 @@ else:
 # if response.status_code == HTTPStatus.OK:
 #     json_response = response.json()
 #     print(json_response['result']['stats'])
+
+if __name__ == '__main__':
+    
+    b = getBalance()
+    print ("balance {:9.8f} ".format(b))
+
+    if b> 0.001:
+        print("great")
+    # this test should be only run on updating process
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument('-d', '--date', action='store', dest='task_date', help='task date, in format of 2017-10-17', default=datetime.datetime.now().strftime("%Y-%m-%d"))
+    # parser.add_argument('-t', '--type', action='store', dest='task_type', help='type of task, either training or updating', required=True)
+    # parser.add_argument('-c', '--conf', action='store', dest='task_conf', help='config file path', default='pe_1024.yml')
+    # parser.add_argument('-m', '--model', action='store', dest='task_model', help='model type', default='pe_1024')
+    # args = parser.parse_args()
+    # main(args)
