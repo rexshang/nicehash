@@ -165,7 +165,10 @@ def job():
 
 def main(args):
     if args.server:
-        schedule.every().day.at("07:30").do(job)
+        print("run job now")
+        job()
+        print("schedule job at 10:30")
+        schedule.every().day.at("10:30").do(job)
 
         while 1:
             schedule.run_pending()
