@@ -10,7 +10,7 @@ import argparse
 
 
 url = 'https://api.nicehash.com/api?'
-params = {'key': '98cbf48d-513b-c9c6-1d6f-9aeb3d95afda', 'id': '1343547'}
+params = {'key': '406e9f91-fbd1-05ff-95e5-610688031f85', 'id': '1343547'}
 headers = {
     "Accept-Encoding": "gzip, deflate",
     "User-Agent": "gzip,  My Python requests library example client or username"
@@ -56,7 +56,7 @@ algo = {
     33: 'X16R',
     34: 'CyrptoNightV8',
     35: 'SHA256AsicBoost',
-    36: 'MAX',
+    36: 'Zhash',
     37: 'MAX',
     38: 'MAX',
     39: 'MAX',
@@ -128,7 +128,7 @@ def getStatus():
             else:
                 location = ""
 
-            print("{:20s} algo: {:15s} {:10d} min, {:2s}".format(
+            print("{:20s} algo: {:20s} {:10d} min, {:2s}".format(
                 miner[minerStatus.Name], algorithm, miner[minerStatus.Time], location))
         # print(json_response['result'])
     else:
@@ -173,13 +173,15 @@ def main(args):
         while 1:
             schedule.run_pending()
             time.sleep(1)
-    elif args.balance:
-        getBalance()
-    elif args.miner:
-        getStatus()
     else:
-        getStatus()
+        if args.balance:
+            getBalance()
 
+        if args.miner:
+            getStatus()
+
+        if args.miner == False and args.balance == False:
+            getStatus()
 
 if __name__ == '__main__':
 
